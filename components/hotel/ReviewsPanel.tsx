@@ -15,13 +15,15 @@ export default function ReviewsPanel() {
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    // Lưu reference trước khi await — sau await, e.currentTarget sẽ là null
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     await createReview({
       guestName: String(fd.get("guestName") ?? ""),
       rating: Number(fd.get("rating") ?? 5),
       comment: String(fd.get("comment") ?? ""),
     });
-    e.currentTarget.reset();
+    form.reset();
     showToast("Cảm ơn bạn đã gửi đánh giá.");
     const role = (window as unknown as { __hotelUserRole?: string }).__hotelUserRole;
     if (role === "staff") navigateHotelPage("reviews");

@@ -35,7 +35,9 @@ export default function BookingPanel() {
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const fd = new FormData(e.currentTarget);
+    // Lưu reference trước khi await — sau await, e.currentTarget sẽ là null
+    const form = e.currentTarget;
+    const fd = new FormData(form);
     const preferred = String(fd.get("preferredRoom") ?? "").trim();
     let roomType = String(fd.get("roomType") ?? "");
     if (preferred) roomType = `${roomType} (ưu tiên #${preferred})`;
@@ -47,7 +49,7 @@ export default function BookingPanel() {
       checkout: String(fd.get("checkout") ?? ""),
       status: "Đã xác nhận",
     });
-    e.currentTarget.reset();
+    form.reset();
     showToast("Đặt phòng thành công. Đơn đã chuyển đến quầy lễ tân.");
     const role = (window as unknown as { __hotelUserRole?: string }).__hotelUserRole;
     if (role === "staff") navigateHotelPage("reception");

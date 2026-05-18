@@ -2,6 +2,8 @@ import type { CSSProperties } from "react";
 import Script from "next/script";
 import CrudDashboard from "@/components/CrudDashboard";
 import BookingPanel from "@/components/hotel/BookingPanel";
+import ChatPanel from "@/components/hotel/ChatPanel";
+import ChatWidget from "@/components/hotel/ChatWidget";
 import DashboardLive from "@/components/hotel/DashboardLive";
 import DashboardRoomStats from "@/components/hotel/DashboardRoomStats";
 import ReceptionBookingsTable from "@/components/hotel/ReceptionBookingsTable";
@@ -64,6 +66,7 @@ export default function Home() {
           <button className="side-btn internal-only" data-page="finance"><i className="fa-solid fa-money-bill-trend-up"></i>Tài chính</button>
           <button className="side-btn internal-only" data-page="settings"><i className="fa-solid fa-gear"></i>Cài đặt</button>
           <button className="side-btn internal-only" data-page="crud"><i className="fa-solid fa-database"></i>Mock API CRUD</button>
+          <button className="side-btn internal-only" data-page="chat"><i className="fa-solid fa-headset"></i>Chat hỗ trợ</button>
         </aside>
 
         <main className="main-panel">
@@ -267,10 +270,15 @@ export default function Home() {
           <section id="crud" className="page internal-only">
             <CrudDashboard />
           </section>
+
+          <section id="chat" className="page internal-only">
+            <ChatPanel />
+          </section>
         </main>
       </div>
 
       <div id="toast" className="toast">Thông báo</div>
+      <ChatWidget />
       <Script src="/app.js" strategy="afterInteractive" />
     </>
   );
