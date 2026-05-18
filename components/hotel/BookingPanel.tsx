@@ -5,12 +5,16 @@ import { useEffect, useRef } from "react";
 import { useBookingDraft } from "@/context/BookingDraftContext";
 import { navigateHotelPage, showToast } from "@/lib/clientUi";
 import { useBookings } from "@/hooks/useHotelData";
+import { useState } from "react";
 import { BookingStatusTag } from "./BookingStatusTag";
+import PaymentModal from "./PaymentModal";
 
 export default function BookingPanel() {
   const { bookings, createBooking } = useBookings();
   const { consumeRoomDraft } = useBookingDraft();
   const formRef = useRef<HTMLFormElement>(null);
+  const [paymentOpen, setPaymentOpen] = useState(false);
+  const [pendingBooking, setPendingBooking] = useState<any>(null);
 
   useEffect(() => {
     const onPage = (e: Event) => {
@@ -33,26 +37,35 @@ export default function BookingPanel() {
 
   const recent = [...bookings].sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1)).slice(0, 8);
 
-  const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
+  const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Lưu reference trước khi await — sau await, e.currentTarget sẽ là null
     const form = e.currentTarget;
     const fd = new FormData(form);
     const preferred = String(fd.get("preferredRoom") ?? "").trim();
     let roomType = String(fd.get("roomType") ?? "");
     if (preferred) roomType = `${roomType} (ưu tiên #${preferred})`;
-    await createBooking({
+    
+    // Lưu tạm thông tin để truyền sang Payment Modal
+    setPendingBooking({
       guest: String(fd.get("guest") ?? ""),
       phone: String(fd.get("phone") ?? ""),
       roomType,
       checkin: String(fd.get("checkin") ?? ""),
       checkout: String(fd.get("checkout") ?? ""),
-      status: "Đã xác nhận",
+      // Giả lập tính tổng tiền (Thực tế phải tính dựa trên giá phòng * số ngày)
+      totalAmount: "4.290.000đ"
     });
-    form.reset();
-    showToast("Đặt phòng thành công. Đơn đã chuyển đến quầy lễ tân.");
-    const role = (window as unknown as { __hotelUserRole?: string }).__hotelUserRole;
-    if (role === "staff") navigateHotelPage("reception");
+    setPaymentOpen(true);
+  };
+
+  const handlePaymentSuccess = async () => {
+    if (pendingBooking) {
+      await createBooking({
+        ...pendingBooking,
+        status: "Đã thanh toán",
+      });
+      formRef.current?.reset();
+    }
   };
 
   return (
@@ -164,6 +177,13 @@ export default function BookingPanel() {
           </table>
         </div>
       </article>
+
+      <PaymentModal 
+        isOpen={paymentOpen} 
+        onClose={() => setPaymentOpen(false)} 
+        bookingData={pendingBooking}
+        onSuccess={handlePaymentSuccess}
+      />
     </>
   );
 }

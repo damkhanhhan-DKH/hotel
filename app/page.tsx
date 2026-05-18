@@ -4,8 +4,11 @@ import CrudDashboard from "@/components/CrudDashboard";
 import BookingPanel from "@/components/hotel/BookingPanel";
 import ChatPanel from "@/components/hotel/ChatPanel";
 import ChatWidget from "@/components/hotel/ChatWidget";
+import ContactPanel from "@/components/hotel/ContactPanel";
 import DashboardLive from "@/components/hotel/DashboardLive";
 import DashboardRoomStats from "@/components/hotel/DashboardRoomStats";
+import LandingPage from "@/components/hotel/LandingPage";
+import ProfilePanel from "@/components/hotel/ProfilePanel";
 import ReceptionBookingsTable from "@/components/hotel/ReceptionBookingsTable";
 import ReviewsPanel from "@/components/hotel/ReviewsPanel";
 import RoomsPanel from "@/components/hotel/RoomsPanel";
@@ -55,10 +58,15 @@ export default function Home() {
       <div id="appShell" className="app-shell hidden">
         <aside className="side-nav">
           <h1>Luxury PMS</h1>
-          <button className="side-btn active" data-page="dashboard"><i className="fa-solid fa-chart-pie"></i>Bảng điều khiển</button>
-          <button className="side-btn" data-page="rooms"><i className="fa-solid fa-bed"></i>Phòng</button>
-          <button className="side-btn" data-page="booking"><i className="fa-solid fa-calendar-check"></i>Đặt phòng</button>
+          <button className="side-btn" data-page="home"><i className="fa-solid fa-house"></i>Trang chủ</button>
+          <button className="side-btn" data-page="rooms"><i className="fa-solid fa-bed"></i>Danh sách phòng</button>
+          <button className="side-btn" data-page="booking"><i className="fa-solid fa-calendar-check"></i>Đặt phòng online</button>
           <button className="side-btn" data-page="reviews"><i className="fa-solid fa-star"></i>Đánh giá</button>
+          <button className="side-btn" data-page="contact"><i className="fa-solid fa-envelope"></i>Liên hệ</button>
+          <button className="side-btn" data-page="profile"><i className="fa-regular fa-user"></i>Tài khoản cá nhân</button>
+          
+          <hr className="nav-divider internal-only" />
+          <button className="side-btn internal-only active" data-page="dashboard"><i className="fa-solid fa-chart-pie"></i>Bảng điều khiển</button>
           <button className="side-btn internal-only" data-page="reception"><i className="fa-solid fa-desktop"></i>Lễ tân</button>
           <button className="side-btn internal-only" data-page="guests"><i className="fa-solid fa-users"></i>Khách hàng</button>
           <button className="side-btn internal-only" data-page="services"><i className="fa-solid fa-bell-concierge"></i>Dịch vụ</button>
@@ -84,7 +92,11 @@ export default function Home() {
             </div>
           </header>
 
-          <section id="dashboard" className="page active">
+          <section id="home" className="page active">
+            <LandingPage />
+          </section>
+
+          <section id="dashboard" className="page internal-only">
             <div className="hero">
               <div>
                 <span className="chip">Online 24/7</span>
@@ -128,6 +140,14 @@ export default function Home() {
 
           <section id="booking" className="page">
             <BookingPanel />
+          </section>
+
+          <section id="contact" className="page">
+            <ContactPanel />
+          </section>
+
+          <section id="profile" className="page">
+            <ProfilePanel />
           </section>
 
           <section id="reception" className="page internal-only">

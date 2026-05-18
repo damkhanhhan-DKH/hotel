@@ -19,6 +19,8 @@ export default function RoomsPanel() {
   const { setRoomDraft } = useBookingDraft();
   const [keyword, setKeyword] = useState("");
   const [filter, setFilter] = useState<string>("all");
+  const [capacity, setCapacity] = useState<number>(0);
+  const [maxPrice, setMaxPrice] = useState<number>(10000000);
   const [modalRoom, setModalRoom] = useState<EnrichedRoom | null>(null);
   const [activeImage, setActiveImage] = useState<string | null>(null);
 
@@ -29,9 +31,20 @@ export default function RoomsPanel() {
     return enriched.filter((room) => {
       const passFilter = filter === "all" || filter === room.status;
       const passSearch = !k || room.id.toLowerCase().includes(k) || room.type.toLowerCase().includes(k);
-      return passFilter && passSearch;
+      
+      // Giả lập số người từ loại phòng (nếu là Twin/Double -> 2, Suite -> 2-4, Family -> 4)
+      let roomCap = 2;
+      if (room.type.includes("Family")) roomCap = 4;
+      if (room.type.includes("Suite")) roomCap = 3;
+      const passCapacity = capacity === 0 || roomCap >= capacity;
+
+      // Extract số từ chuỗi giá (ví dụ "4.290.000đ" -> 4290000)
+      const priceNum = parseInt(room.price.replace(/\D/g, "")) || 0;
+      const passPrice = priceNum <= maxPrice;
+
+      return passFilter && passSearch && passCapacity && passPrice;
     });
-  }, [enriched, keyword, filter]);
+  }, [enriched, keyword, filter, capacity, maxPrice]);
 
   useEffect(() => {
     const onGlobal = (e: Event) => {
@@ -52,20 +65,43 @@ export default function RoomsPanel() {
 
   return (
     <>
-      <div className="page-tools">
-        <input
-          type="search"
-          placeholder="Tìm theo số phòng, loại phòng..."
-          value={keyword}
-          onChange={(e) => setKeyword(e.target.value)}
-        />
-        <select value={filter} onChange={(e) => setFilter(e.target.value)}>
-          <option value="all">Tất cả trạng thái</option>
-          <option value="occupied">Đang ở</option>
-          <option value="available">Trống</option>
-          <option value="dirty">Cần dọn</option>
-          <option value="maintenance">Bảo trì</option>
-        </select>
+      <div className="advanced-search-panel panel-card">
+        <div className="search-grid">
+          <label>
+            Tìm kiếm
+            <input
+              type="search"
+              placeholder="Tên phòng, loại phòng..."
+              value={keyword}
+              onChange={(e) => setKeyword(e.target.value)}
+            />
+          </label>
+          <label>
+            Ngày nhận - trả
+            <input type="text" placeholder="Chọn ngày (Mock)" onFocus={(e) => e.target.type = 'date'} onBlur={(e) => e.target.type = 'text'} />
+          </label>
+          <label>
+            Số người
+            <select value={capacity} onChange={(e) => setCapacity(Number(e.target.value))}>
+              <option value={0}>Mọi sức chứa</option>
+              <option value={1}>1 Người</option>
+              <option value={2}>2 Người</option>
+              <option value={3}>3 Người</option>
+              <option value={4}>4+ Người</option>
+            </select>
+          </label>
+          <label>
+            Mức giá tối đa: {maxPrice.toLocaleString('vi-VN')}đ
+            <input 
+              type="range" 
+              min="1000000" 
+              max="15000000" 
+              step="500000"
+              value={maxPrice} 
+              onChange={(e) => setMaxPrice(Number(e.target.value))} 
+            />
+          </label>
+        </div>
       </div>
 
       <div className="room-grid">
@@ -122,8 +158,15 @@ export default function RoomsPanel() {
                   Phòng {modalRoom.id} - {modalRoom.type}
                 </h4>
                 <p>
-                  {roomStatusText(modalRoom.status)} | {modalRoom.price} | {modalRoom.guest}
+                  {roomStatusText(modalRoom.status)} | {modalRoom.price} | Tối đa: {modalRoom.type.includes("Family") ? 4 : modalRoom.type.includes("Suite") ? 3 : 2} người
                 </p>
+                <div className="room-amenities">
+                  <span title="WiFi Miễn phí"><i className="fa-solid fa-wifi"></i></span>
+                  <span title="Tivi thông minh"><i className="fa-solid fa-tv"></i></span>
+                  <span title="Điều hòa"><i className="fa-regular fa-snowflake"></i></span>
+                  <span title="Bồn tắm"><i className="fa-solid fa-bath"></i></span>
+                  {modalRoom.type.includes("View") && <span title="View đẹp"><i className="fa-solid fa-mountain-sun"></i></span>}
+                </div>
                 <p>{modalRoom.desc}</p>
                 <div className="thumbs">
                   {modalRoom.images.map((src) => (
